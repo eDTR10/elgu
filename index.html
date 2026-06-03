@@ -428,31 +428,58 @@ function clearHL(){
 
 function bindNodes(){
   document.querySelectorAll('.node').forEach(node=>{
-    const col=node.dataset.col, i=+node.dataset.i;
-    // hover mapping (v2 -> v1)
+    const col = node.dataset.col, i = +node.dataset.i;
+
     node.addEventListener('mouseenter',()=>{
-      if(col==='v2'){
-        const map=DATA[current].v2[i].map||[];
+      if(col === 'v2'){
+        const map = DATA[current].v2[i].map || [];
         if(map.length){
           document.querySelectorAll('.col.v1 .node').forEach(n=>{
-            n.classList.add('dim'); n.classList.remove('hl');
+            n.classList.add('dim'); 
+            n.classList.remove('hl');
           });
+
           map.forEach(mi=>{
-            const t=document.querySelector(`.col.v1 .node[data-i="${mi}"]`);
-            if(t){t.classList.add('hl');t.classList.remove('dim');}
+            const t = document.querySelector(`.col.v1 .node[data-i="${mi}"]`);
+            if(t){
+              t.classList.add('hl');
+              t.classList.remove('dim');
+            }
           });
+
           node.classList.add('hl');
         }
       }
     });
-    node.addEventListener('mouseleave',()=>{ if(col==='v2') clearHL(); });
-    // click = expand + (for v2) lock highlight
+
+    node.addEventListener('mouseleave',()=>{
+      if(col === 'v2') clearHL();
+    });
+
     node.addEventListener('click',()=>{
-      const id=col+'-'+i;
-      const isOpen=node.classList.contains('open');
-      // close others in same column
-      document.querySelectorAll(`.node[data-col="${col}"]`).forEach(n=>n.classList.remove('open'));
+      const isOpen = node.classList.contains('open');
+
+      document
+        .querySelectorAll(`.node[data-col="${col}"]`)
+        .forEach(n=>n.classList.remove('open'));
+
       if(!isOpen) node.classList.add('open');
+
+      // NEW: when opening v2, also open mapped v1 accordion(s)
+      if(col === 'v2'){
+        document
+          .querySelectorAll('.col.v1 .node')
+          .forEach(n=>n.classList.remove('open'));
+
+        if(!isOpen){
+          const map = DATA[current].v2[i].map || [];
+
+          map.forEach(mi=>{
+            const v1Node = document.querySelector(`.col.v1 .node[data-i="${mi}"]`);
+            if(v1Node) v1Node.classList.add('open');
+          });
+        }
+      }
     });
   });
 }
